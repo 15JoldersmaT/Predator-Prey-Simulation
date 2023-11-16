@@ -159,7 +159,7 @@ cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)) f
 mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)) for _ in range(1)]
 
 
-input_size = 2 + 6 * len(cats) + 6 * len(mice)  # 2 for self, 6 per other animal
+input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other animal
 
 for cat in cats:
     cat.brain = np.random.rand(input_size, 2)
@@ -176,6 +176,7 @@ def normalize_coordinate(x, max_value):
     return x / max_value
 
 def construct_input_for_animal(current_animal, cats, mice):
+    global Time
     inputs = []
 
     # Include the current animal's own x, y positions first
@@ -200,7 +201,7 @@ def construct_input_for_animal(current_animal, cats, mice):
         diff_x = current_animal.rect.x - mouse.rect.x
         diff_y = current_animal.rect.y - mouse.rect.y
         inputs.extend([diff_x, diff_y])
-
+    inputs.append(Time)
     return np.array(inputs)
 
 myFont = pygame.font.SysFont("Times New Roman", 18)
