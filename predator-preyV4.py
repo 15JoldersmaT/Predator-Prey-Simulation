@@ -144,7 +144,7 @@ class Cat(Animal):
 
 class Mouse(Animal):
     def __init__(self, x, y):
-        super().__init__(x, y, GREEN, speed=5)
+        super().__init__(x, y, GREEN, speed=4)
         self.edge_touch = False
     def move(self, direction):
         super().move(direction)  # Call the move method from the parent class
