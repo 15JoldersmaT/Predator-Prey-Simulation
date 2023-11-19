@@ -18,7 +18,7 @@ If a mouse is caught by a cat, its brain mutates.
 
 ![](demo.gif)
 
-(3 mice, to cats in demo, wall mutation on)
+(3 mice, to cats in demo, wall mutation on, leaky relu used for activation function)
 
 
 
