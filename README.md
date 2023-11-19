@@ -14,6 +14,7 @@ If either a cat or mouse is touching the edge of the screen, their brains mutate
 If a cat does not catch a mouse, its brain mutates.
 If a mouse is caught by a cat, its brain mutates.
 
+![](demo.gif)
 
 
 
