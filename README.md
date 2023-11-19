@@ -1,7 +1,7 @@
 # Predator-Prey-Simulation
 Python script I wrote to showcase reinforcement learning/Genetic algorithms.
 
-The way version 4 works:
+The way version 8 works:
 There are two predators (cat) and one prey (mouse).
 
 They are initialized with 'brains' that are random values represented in a Numpy array. 
