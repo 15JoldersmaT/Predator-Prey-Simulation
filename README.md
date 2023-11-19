@@ -20,6 +20,8 @@ If a mouse is caught by a cat, its brain mutates.
 
 (3 mice, to cats in demo, wall mutation on, leaky relu used for activation function)
 
+Simulations with more than two cats seem to behave strangely, still debugging. 
+
 
 
 
