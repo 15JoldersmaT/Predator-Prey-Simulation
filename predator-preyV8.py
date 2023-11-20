@@ -4,8 +4,8 @@ import random
 
 
 print ('Good example setup, 2 cats 2 mice')
-noMice = input('Number of Mice?')
-noCats = input('Number of Cats?')
+noMice = 3
+noCats = 2
 wallMut = False
 wM = input('Mouse mutate on walls? (y or n)')
 if wM == 'y':
@@ -27,8 +27,13 @@ GREEN = (0, 255, 0)
 FPS = 60
 TIME_THRESHOLD = 1380  # Time in milliseconds, e.g., 30 seconds
 CATCH_DISTANCE = 10  # Example catch distance in pixels
-MOUSE_SPEED = 2
-CAT_SPEED = 9
+MOUSE_SPEED = 3
+CAT_SPEED = 6
+
+INPUT_SIZE = 33   # Number of input neurons
+HIDDEN_SIZE = 66 # Number of hidden neurons, 4 works somewhat
+OUTPUT_SIZE = 2  # Number of output neurons
+
 
 mouseLoseStreak = 0
 start_time = pygame.time.get_ticks()
@@ -83,14 +88,13 @@ def reset_preys(preys):
         prey.rect.y = random.randint(1,600)  # Define starting y-coordinate
         prey.catch = False
         
-def mutate_brain(brain, mutation_rate=0.2, mutation_amount=0.2):
-    # Apply mutation to each weight in the brain
-    for i in range(brain.shape[0]):
-        for j in range(brain.shape[1]):
-            if random.random() < mutation_rate:  # Random chance to mutate
-                # Apply a small random change
+def mutate_brain(animal, mutation_rate=0.2, mutation_amount=0.2):
+    # Mutate weights_input_hidden
+    for i in range(animal.weights_input_hidden.shape[0]):
+        for j in range(animal.weights_input_hidden.shape[1]):
+            if random.random() < mutation_rate:
                 change = np.random.normal(0, mutation_amount)
-                brain[i][j] += change
+                animal.weights_input_hidden[i][j] += change
 
 def leaky_relu(x, alpha=0.01):
         return np.maximum(alpha * x, x)
@@ -104,12 +108,17 @@ def relu(x):
     
     
 class Animal:
-    def __init__(self, x, y, color, speed):
+    def __init__(self, x, y, color, input_size, hidden_size, output_size, speed):
         self.rect = pygame.Rect(x, y, 20, 20)
         self.color = color
         self.speed = speed
         self.catch = False  # Initialize catch attribute
         self.brain = np.random.rand(5, 2)  # Adjusted brain shape
+        # Initialize weights and biases
+        self.weights_input_hidden = np.random.randn(input_size, hidden_size)
+        self.bias_hidden = np.random.randn(hidden_size)
+        self.weights_hidden_output = np.random.randn(hidden_size, output_size)
+        self.bias_output = np.random.randn(output_size)
   # Example brain structure
 
     def draw(self):
@@ -123,17 +132,41 @@ class Animal:
     
     def think(self, inputs):
         global af
+        global INPUT_SIZE   # Number of input neurons
+        global HIDDEN_SIZE  # Number of hidden neurons
+        global OUTPUT_SIZE
+        #THINKING BEFORE HIDDEN LAYERS IMPLEMENTED
         # Simple neural network without activation function
-        output = np.dot(inputs, self.brain)
-        if af == 's':
-            return sigmoid(output)
-        elif af == 'l': 
-            return leaky_relu(output)
+        #output = np.dot(inputs, self.brain)
+        #if af == 's':
+        #    return sigmoid(output)
+        #elif af == 'l': 
+         #   return leaky_relu(output)
+        #else:
+         #   return relu(output)
+        #From input to hidden layer
+        hidden_layer_input = np.dot(inputs, self.weights_input_hidden) + self.bias_hidden
+        hidden_layer_output = leaky_relu(hidden_layer_input)
+
+        # From hidden to output layer
+        output_layer_input = np.dot(hidden_layer_output, self.weights_hidden_output) + self.bias_output
+        if af == 'l':
+            output = leaky_relu(output_layer_input)  # or another activation function for the output
+        elif af == 'r':
+            output = relu(output_layer_input)  # or another activation function for the output
         else:
-            return relu(output)
+            output = sigmoid(output_layer_input)  # or another activation function for the output
+
+            
+
+            
+        return output
         
 
     def move(self, direction):
+        global INPUT_SIZE   # Number of input neurons
+        global HIDDEN_SIZE  # Number of hidden neurons
+        global OUTPUT_SIZE
         #Add randomness to the movement
         random_movement = np.random.rand(2) * 2 - 1  # Random values between -1 and 1
         random_scale = 0.3  # Adjust this to increase/decrease randomness
@@ -153,17 +186,18 @@ class Animal:
 
 
 class Cat(Animal):
-    def __init__(self, x, y):
-        super().__init__(x, y, RED, CAT_SPEED)
-        self.edge_touch = False
+    def __init__(self, x, y, color, input_size, hidden_size, output_size, speed):
+        super().__init__(x, y, color, input_size, hidden_size, output_size, speed)
+        # Additional Cat-specific initializations
 
     def move(self, direction):
+        
         super().move(direction)  # Call the move method from the parent class
         # Check if touching the edge of the screen
         if self.rect.left <= 10 or self.rect.right >= SCREEN_WIDTH -10 or self.rect.top <= 10 or self.rect.bottom >= SCREEN_HEIGHT -10:
             self.edge_touch = True
             if wallMut == True:
-                mutate_brain(self.brain,.1)
+                mutate_brain(self,.1)
             #mutate_brain(self.brain)
 
             self.edge_touch = False
@@ -178,8 +212,8 @@ class Cat(Animal):
      
 
 class Mouse(Animal):
-    def __init__(self, x, y):
-        super().__init__(x, y, GREEN, MOUSE_SPEED)
+    def __init__(self, x, y, color, input_size, hidden_size, output_size, speed):
+        super().__init__(x, y, color, input_size, hidden_size, output_size, speed)
         self.edge_touch = False
     def move(self, direction):
         global epoch
@@ -190,7 +224,7 @@ class Mouse(Animal):
             self.edge_touch = True
 
             if wallMut == True:
-                mutate_brain(self.brain, .1)
+                mutate_brain(self, .1)
             #mutate_brain(self.brain)
             
             #mutate_brain(self.brain)
@@ -208,8 +242,8 @@ class Mouse(Animal):
             return
 
         
-cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)) for _ in range(int(noCats))]
-mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)) for _ in range(int(noMice))]
+cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), RED, INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, CAT_SPEED) for _ in range(int(noCats))]
+mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), GREEN, INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED) for _ in range(int(noMice))]
 
 
 input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other animal
@@ -308,7 +342,7 @@ while running:
     current_time = pygame.time.get_ticks()
     if Time > TIME_THRESHOLD:
         for cat in cats:
-            mutate_brain(cat.brain, .2)
+            mutate_brain(cat, .2)
             #mutate_brain(cat.brain)
 
 
@@ -329,7 +363,7 @@ while running:
     for cat in cats:
         for mouse in mice:
             if check_collision(cat, mouse, CATCH_DISTANCE) and cat.catch == False and mouse.catch == False:
-                mutate_brain(mouse.brain, .5,.5)
+                mutate_brain(mouse, .5,.5)
                 mouse.catch = True
                 cat.catch = True
                 
@@ -351,7 +385,7 @@ while running:
         for cat in cats:
             if cat == last_cat_to_catch:
                 # Mutate cats except the last one to catch a mouse
-                mutate_brain(cat.brain)
+                mutate_brain(cat)
                 #mutate_brain(cat.brain)
 
                 cat.catch = False  # Reset the catch attribute for the next round
