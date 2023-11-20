@@ -18,7 +18,10 @@ If a mouse is caught by a cat, its brain mutates.
 
 ![](demo.gif)
 
-(3 mice, to cats in demo, wall mutation on, leaky relu used for activation function)
+(3 mice, to cats in demo, wall mutation on, leaky relu used for activation function, version 8)
+
+Arder Cat version:
+expanded number of neurons with hidden layers. Fixed number of cats and mice in this version currently. 
 
 Simulations with more than two cats seem to behave strangely, still debugging. 
 
