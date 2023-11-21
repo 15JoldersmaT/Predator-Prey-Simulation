@@ -385,7 +385,7 @@ while running:
         reset_preys(mice)
     last_cat_to_catch = None
     catch_count = 0  # Counter for the number of cats that have caught a mouse
-
+    caught_count = 0
     for cat in cats:
         for mouse in mice:
             if check_collision(cat, mouse, CATCH_DISTANCE) and cat.catch == False and mouse.catch == False:
@@ -393,6 +393,7 @@ while running:
                 mouse.catch = True
                 cat.catch = True
                 catch_count += 1
+                caught_count += 1
                 last_cat_to_catch = cat
                 
 
@@ -400,24 +401,24 @@ while running:
 
 
     # Check if all cats have caught a mouse or no mice are left
-    #for cat in cats:
-    #    for mouse in mice:
-    #        if check_collision(cat, mouse, CATCH_DISTANCE):
-    #            cat.catch = True
-    #            mouse.catch = True
-    #            catch_count += 1
-    #            last_cat_to_catch = cat
+    for cat in cats:
+        for mouse in mice:
+            if check_collision(cat, mouse, CATCH_DISTANCE):
+                cat.catch = True
+                mouse.catch = True
+                catch_count += 1
+                caught_count += 1
+                last_cat_to_catch = cat
                 # Logic to handle caught mouse (e.g., remove the mouse)
 
     # Check if all but one cat have caught a mouse
-    if catch_count >= len(cats) - 1:
+    if catch_count >= len(cats) - 1 or caught_count >= noMice:
         for cat in cats:
             if cat == last_cat_to_catch:
                 # Mutate cats except the last one to catch a mouse
                 mutate_brain(cat)
                 #mutate_brain(cat.brain)
 
-                cat.catch = False  # Reset the catch attribute for the next round
         reset_predators(cats)
         reset_preys(mice)
         epoch = epoch + 1
