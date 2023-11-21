@@ -392,19 +392,21 @@ while running:
                 mutate_brain(mouse, .5,.5)
                 mouse.catch = True
                 cat.catch = True
+                catch_count += 1
+                last_cat_to_catch = cat
                 
 
                 
 
 
     # Check if all cats have caught a mouse or no mice are left
-    for cat in cats:
-        for mouse in mice:
-            if check_collision(cat, mouse, CATCH_DISTANCE):
-                cat.catch = True
-                mouse.catch = True
-                catch_count += 1
-                last_cat_to_catch = cat
+    #for cat in cats:
+    #    for mouse in mice:
+    #        if check_collision(cat, mouse, CATCH_DISTANCE):
+    #            cat.catch = True
+    #            mouse.catch = True
+    #            catch_count += 1
+    #            last_cat_to_catch = cat
                 # Logic to handle caught mouse (e.g., remove the mouse)
 
     # Check if all but one cat have caught a mouse
