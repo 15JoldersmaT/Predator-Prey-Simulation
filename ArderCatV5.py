@@ -253,8 +253,8 @@ class Mouse(Animal):
             return
 
         
-cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), RED, INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, CAT_SPEED,0,0) for _ in range(int(noCats))]
-mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), GREEN, INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED,0,0) for _ in range(int(noMice))]
+cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), (255,random.randint(0,150),0), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, CAT_SPEED,0,0) for _ in range(int(noCats))]
+mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), (0,255,random.randint(0,150)), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED,0,0) for _ in range(int(noMice))]
 
 
 input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other animal
@@ -402,6 +402,7 @@ while running:
         for mouse in mice:
             if check_collision(cat, mouse, CATCH_DISTANCE):
                 cat.catch = True
+                mouse.catch = True
                 catch_count += 1
                 last_cat_to_catch = cat
                 # Logic to handle caught mouse (e.g., remove the mouse)
