@@ -25,7 +25,7 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 FPS = 60
-TIME_THRESHOLD = 1380  # Time in milliseconds, e.g., 30 seconds
+TIME_THRESHOLD = int(input('Trial length. ex. 1380 : ')) # Time in milliseconds, e.g., 30 seconds
 CATCH_DISTANCE = 10  # Example catch distance in pixels
 MOUSE_SPEED = int(input('Mouse Speed. ex. 5 : '))
 CAT_SPEED = int(input('Cat Speed. ex. 5 : '))
@@ -36,6 +36,8 @@ OUTPUT_SIZE = 2  # Number of output neurons
 
 
 smarts = input('Intelligence, higher values increase training time, use 2 for example.')
+cP = input('Predators cooperate (all cats mutate if time runs out with mice left if true) (t or f)')
+
 
 hidden_size = 33 * int(smarts) # Number of hidden neurons, 4 works somewhat
 
@@ -361,7 +363,12 @@ while running:
     current_time = pygame.time.get_ticks()
     if Time > TIME_THRESHOLD:
         for cat in cats:
-            mutate_brain(cat, .2)
+            if cP == 'f':
+                if cat.catch ==False:
+                    mutate_brain(cat, .2)
+
+            else:   
+                mutate_brain(cat, .2)
             #mutate_brain(cat.brain)
 
 
@@ -415,6 +422,7 @@ while running:
         catch_count = 0  # Reset the counter
         last_cat_to_catch = None
 
+    
         # Reset the timer
     start_time = current_time
         
