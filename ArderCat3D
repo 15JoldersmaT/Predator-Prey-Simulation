@@ -118,7 +118,7 @@ def relu(x):
     
 class Animal:
     def __init__(self, x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY):
-        self.rect = pygame.Rect(x, y, 20, 20)  # 2D rectangle for now
+        self.rect = pygame.Rect(x, y, 30, 30)  # 2D rectangle for now
         self.z = z  # New Z coordinate
         self.pX = pX
         self.pY = pY
