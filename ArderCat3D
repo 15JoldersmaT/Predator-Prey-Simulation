@@ -84,6 +84,7 @@ def distance(x1, y1, z1, x2, y2, z2):
 
 def reset_predators(predators):
     # Set predators to a specific starting position
+    global catch_count
     catch_count = 0
     for predator in predators:
         predator.rect.x = random.randint(1,800)  # Define starting x-coordinate
@@ -93,6 +94,7 @@ def reset_predators(predators):
 
 
 def reset_preys(preys):
+    global caught_count
     caught_count = 0
     # Set preys to a different specific starting position
     for prey in preys:
