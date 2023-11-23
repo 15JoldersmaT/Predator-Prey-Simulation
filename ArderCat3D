@@ -458,18 +458,27 @@ while running:
         inputs = construct_input_for_animal(cat, cats, mice)
         direction = cat.think(inputs)
         cat.move(direction)
-        cat.draw()
 
     for mouse in mice:
         inputs = construct_input_for_animal(mouse, cats, mice)
         direction = mouse.think(inputs)
         mouse.move(direction)
-        mouse.draw()
 
    
 
  
+    # Combine cats and mice into a single list
+    all_animals = cats + mice
 
+    # Sort the animals based on their Z-coordinate (higher Z-coordinates should be drawn last)
+    all_animals.sort(key=lambda animal: animal.z, reverse=True)
+
+    # ... other game loop code ...
+
+    # Draw each animal
+    for animal in all_animals:
+        animal.draw()
+        
     epoch_surface = myFont.render(f"Epoch: {epoch}", True, WHITE)
     epoch_position = (SCREEN_WIDTH - 150, 10)  # Adjust position as needed
     screen.blit(epoch_surface, epoch_position)
