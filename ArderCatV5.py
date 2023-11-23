@@ -37,7 +37,7 @@ OUTPUT_SIZE = 2  # Number of output neurons
 
 smarts = input('Intelligence, higher values increase training time, use 2 for example.')
 cP = input('Predators cooperate (all cats mutate if time runs out with mice left if true) (t or f)')
-
+mutateLast = input('Mutate cat last to catch? (t or f), t is default behavior, if f, cats only mutate when they run out of time or on wall :')
 
 hidden_size = 33 * int(smarts) # Number of hidden neurons, 4 works somewhat
 
@@ -48,9 +48,10 @@ epoch = 0
 Time =0
 # Setup the display
 
-
+catch_count = 0  # Counter for the number of cats that have caught a mouse
+caught_count = 0
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Predator-Prey Ecosystem")
+pygame.display.set_caption("Predator-Prey - Deep Learning")
 
 # Clock to control game's frame rate
 clock = pygame.time.Clock()
@@ -81,6 +82,8 @@ def distance(x1, y1, x2, y2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
 def reset_predators(predators):
+    global catch_count
+    catch_count = 0
     # Set predators to a specific starting position
     for predator in predators:
         predator.rect.x = random.randint(1,800)  # Define starting x-coordinate
@@ -89,6 +92,8 @@ def reset_predators(predators):
 
 
 def reset_preys(preys):
+    global caught_count
+    caught_count = 0
     # Set preys to a different specific starting position
     for prey in preys:
         prey.rect.x = random.randint(1,800)  # Define starting x-coordinate
@@ -384,8 +389,7 @@ while running:
         reset_predators(cats)
         reset_preys(mice)
     last_cat_to_catch = None
-    catch_count = 0  # Counter for the number of cats that have caught a mouse
-    caught_count = 0
+   
     for cat in cats:
         for mouse in mice:
             if check_collision(cat, mouse, CATCH_DISTANCE) and cat.catch == False and mouse.catch == False:
@@ -403,7 +407,7 @@ while running:
     # Check if all cats have caught a mouse or no mice are left
     for cat in cats:
         for mouse in mice:
-            if check_collision(cat, mouse, CATCH_DISTANCE):
+            if check_collision(cat, mouse, CATCH_DISTANCE) and cat.catch == False and mouse.catch == False:
                 cat.catch = True
                 mouse.catch = True
                 catch_count += 1
@@ -412,9 +416,9 @@ while running:
                 # Logic to handle caught mouse (e.g., remove the mouse)
 
     # Check if all but one cat have caught a mouse
-    if catch_count >= len(cats) - 1 or caught_count >= noMice:
+    if catch_count >= len(cats) - 1 or catch_count >= noMice:
         for cat in cats:
-            if cat == last_cat_to_catch:
+            if cat == last_cat_to_catch and mutateLast == 't':
                 # Mutate cats except the last one to catch a mouse
                 mutate_brain(cat)
                 #mutate_brain(cat.brain)
