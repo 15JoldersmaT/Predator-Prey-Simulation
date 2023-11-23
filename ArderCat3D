@@ -30,7 +30,7 @@ CATCH_DISTANCE = 10  # Example catch distance in pixels
 MOUSE_SPEED = int(input('Mouse Speed. ex. 5 : '))
 CAT_SPEED = int(input('Cat Speed. ex. 5 : '))
 
-INPUT_SIZE =  3 + (noCats * 8) + (noMice *8) #43   # Number of input neurons
+INPUT_SIZE = 4 + (noCats * 10) + (noMice * 10)
 HIDDEN_SIZE = 66 # Number of hidden neurons, 4 works somewhat
 OUTPUT_SIZE = 2  # Number of output neurons
 
@@ -117,11 +117,12 @@ def relu(x):
     
     
 class Animal:
-    def __init__(self, x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY):
+    def __init__(self, x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY, pZ):
         self.rect = pygame.Rect(x, y, 30, 30)  # 2D rectangle for now
         self.z = z  # New Z coordinate
         self.pX = pX
         self.pY = pY
+        self.pZ = pZ
         self.color = color
         self.speed = speed
         self.catch = False  # Initialize catch attribute
@@ -211,8 +212,8 @@ class Animal:
 
 
 class Cat(Animal):
-    def __init__(self, x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY):
-        super().__init__(x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY)
+    def __init__(self, x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY, pZ):
+        super().__init__(x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY, pZ)
         # Additional Cat-specific initializations
 
     def move(self, direction):
@@ -237,8 +238,8 @@ class Cat(Animal):
      
 
 class Mouse(Animal):
-    def __init__(self, x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY):
-        super().__init__(x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY)
+    def __init__(self, x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY, pZ):
+        super().__init__(x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY, pZ)
         self.edge_touch = False
         
     def move(self, direction):
@@ -268,9 +269,9 @@ class Mouse(Animal):
             return
 
         
-cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), random.randint(0, 100), (255, random.randint(0, 150), 0), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, CAT_SPEED, 0, 0) for _ in range(int(noCats))]
-mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), random.randint(0, 100), (0, 255, random.randint(0, 150)), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED, 0, 0) for _ in range(int(noMice))]
+cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), random.randint(0, 100),(255, random.randint(0, 150), 0), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, CAT_SPEED, 0, 0, 0) for _ in range(int(noCats))]
 
+mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), random.randint(0, 100), (0, 255, random.randint(0, 150)), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED, 0, 0, 0) for _ in range(int(noMice))]
 input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other animal
 
 for cat in cats:
@@ -294,8 +295,10 @@ def construct_input_for_animal(current_animal, cats, mice):
     normT = normalize_coordinate(Time, TIME_THRESHOLD)
     normX = normalize_coordinate(current_animal.rect.x, SCREEN_WIDTH)
     normY = normalize_coordinate(current_animal.rect.y, SCREEN_HEIGHT)
+    normZ = normalize_coordinate(current_animal.z, 100)
+
     # Include the current animal's own x, y positions first
-    inputs.extend([normX, normY])
+    inputs.extend([normX, normY, normZ])
 
     for cat in cats:
         # Include the x, y positions, type flag, and catch status of the cat
@@ -305,14 +308,20 @@ def construct_input_for_animal(current_animal, cats, mice):
         # Include the differences in x, y
         diff_x = current_animal.rect.x - cat.rect.x
         diff_y = current_animal.rect.y - cat.rect.y
+        diff_z = current_animal.z - cat.z
+
         diff_x = normalize_coordinate(diff_x, SCREEN_WIDTH)
         diff_y = normalize_coordinate(diff_y, SCREEN_WIDTH)
+        diff_z = normalize_coordinate(diff_z, 100)
+
 
 
         diff_xP = current_animal.rect.x - cat.pX
         diff_yP = current_animal.rect.y - cat.pY
+        diff_zP = current_animal.z - cat.pZ
+
         
-        inputs.extend([diff_x, diff_y, diff_xP, diff_yP])
+        inputs.extend([diff_x, diff_y,diff_z, diff_xP, diff_yP, diff_zP])
 
     for mouse in mice:
         # Include the x, y positions, type flag, and catch status of the mouse
@@ -322,14 +331,20 @@ def construct_input_for_animal(current_animal, cats, mice):
         # Include the differences in x, y
         diff_x = current_animal.rect.x - mouse.rect.x
         diff_y = current_animal.rect.y - mouse.rect.y
+        diff_z = current_animal.z - cat.z
+
         diff_x = normalize_coordinate(diff_x, SCREEN_WIDTH)
         diff_y = normalize_coordinate(diff_y, SCREEN_WIDTH)
+        diff_z = normalize_coordinate(diff_z, 100)
+
 
         
         diff_xP = current_animal.rect.x - cat.pX
         diff_yP = current_animal.rect.y - cat.pY
+        diff_zP = current_animal.z - cat.pZ
+
         
-        inputs.extend([diff_x, diff_y, diff_xP, diff_yP])
+        inputs.extend([diff_x, diff_y, diff_z, diff_xP, diff_yP, diff_zP])
     inputs.append(normT)
     return np.array(inputs)
 
