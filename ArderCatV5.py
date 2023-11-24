@@ -30,7 +30,7 @@ CATCH_DISTANCE = 10  # Example catch distance in pixels
 MOUSE_SPEED = int(input('Mouse Speed. ex. 5 : '))
 CAT_SPEED = int(input('Cat Speed. ex. 5 : '))
 
-INPUT_SIZE =  3 + (noCats * 8) + (noMice *8) #43   # Number of input neurons
+INPUT_SIZE = 4 + (noCats * 10) + (noMice * 10)
 HIDDEN_SIZE = 66 # Number of hidden neurons, 4 works somewhat
 OUTPUT_SIZE = 2  # Number of output neurons
 
@@ -39,8 +39,10 @@ smarts = input('Intelligence, higher values increase training time, use 2 for ex
 cP = input('Predators cooperate (all cats mutate if time runs out with mice left if true) (t or f)')
 mutateLast = input('Mutate cat last to catch? (t or f), t is default behavior, if f, cats only mutate when they run out of time or on wall :')
 
-hidden_size = 33 * int(smarts) # Number of hidden neurons
+hidden_size = 33 * int(smarts) # Number of hidden neurons, 4 works somewhat
 
+catch_count = 0  # Counter for the number of cats that have caught a mouse
+caught_count = 0
 
 mouseLoseStreak = 0
 start_time = pygame.time.get_ticks()
@@ -48,8 +50,7 @@ epoch = 0
 Time =0
 # Setup the display
 
-catch_count = 0  # Counter for the number of cats that have caught a mouse
-caught_count = 0
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Predator-Prey - Deep Learning")
 
@@ -78,16 +79,17 @@ def find_closestCat(mouse, cats):
                 closest_cat = cat
     return closest_cat
 
-def distance(x1, y1, x2, y2):
-    return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+def distance(x1, y1, z1, x2, y2, z2):
+    return ((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2) ** 0.5
 
 def reset_predators(predators):
+    # Set predators to a specific starting position
     global catch_count
     catch_count = 0
-    # Set predators to a specific starting position
     for predator in predators:
         predator.rect.x = random.randint(1,800)  # Define starting x-coordinate
-        predator.rect.y = random.randint(1,600)  # Define starting y-coordinate
+        predator.rect.y = random.randint(1,600)
+        predator.z = random.randint(1,100)# Define starting y-coordinate
         predator.catch = False
 
 
@@ -98,6 +100,7 @@ def reset_preys(preys):
     for prey in preys:
         prey.rect.x = random.randint(1,800)  # Define starting x-coordinate
         prey.rect.y = random.randint(1,600)  # Define starting y-coordinate
+        prey.z = random.randint(1,100)# Define starting y-coordinate
         prey.catch = False
         
 def mutate_brain(animal, mutation_rate=0.2, mutation_amount=0.2):
@@ -120,14 +123,16 @@ def relu(x):
     
     
 class Animal:
-    def __init__(self, x, y, color, input_size, hidden_size, output_size, speed, pX, pY):
-        self.rect = pygame.Rect(x, y, 20, 20)
+    def __init__(self, x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY, pZ):
+        self.rect = pygame.Rect(x, y, 30, 30)  # 2D rectangle for now
+        self.z = z  # New Z coordinate
         self.pX = pX
         self.pY = pY
+        self.pZ = pZ
         self.color = color
         self.speed = speed
         self.catch = False  # Initialize catch attribute
-        self.brain = np.random.rand(5, 2)  # Adjusted brain shape
+        self.brain = np.random.rand(5, 3)  # Adjusted brain shape
         # Initialize weights and biases
         self.weights_input_hidden = np.random.randn(input_size, hidden_size)
         self.bias_hidden = np.random.randn(hidden_size)
@@ -172,46 +177,56 @@ class Animal:
 
         # From hidden to output layer
         output_layer_input = np.dot(hidden_layer_output, self.weights_hidden_output) + self.bias_output
+
+        # Assuming the output layer now produces 3 values
         if af == 'l':
-            output = leaky_relu(output_layer_input)  # or another activation function for the output
+            output = leaky_relu(output_layer_input)
         elif af == 'r':
-            output = relu(output_layer_input)  # or another activation function for the output
+            output = relu(output_layer_input)
         else:
-            output = sigmoid(output_layer_input)  # or another activation function for the output
+            output = sigmoid(output_layer_input)
 
-            
+        # Ensure output has three components
+        if len(output) < 3:
+            # Extend with zeros if less than 3 components are present
+            output = np.append(output, [0] * (3 - len(output)))
 
-            
         return output
         
 
     def move(self, direction):
-        global INPUT_SIZE   # Number of input neurons
-        global HIDDEN_SIZE  # Number of hidden neurons
-        global OUTPUT_SIZE
-        #Add randomness to the movement
-        random_movement = np.random.rand(2) * 2 - 1  # Random values between -1 and 1
-        random_scale = 0.3  # Adjust this to increase/decrease randomness
-        move_x, move_y = direction[0] + random_movement[0] * random_scale, direction[1] + random_movement[1] * random_scale
+        # Add randomness to the movement
+        random_movement = np.random.rand(3) * 2 - 1  # For X, Y, Z
+        random_scale = 0.3
+
+        self.pX = self.rect.x
+        self.pY = self.rect.y
+        self.pZ = self.z
+        move_x, move_y, move_z = (direction[0] + random_movement[0] * random_scale, 
+                                  direction[1] + random_movement[1] * random_scale,
+                                  direction[2] + random_movement[2] * random_scale)
 
         # Clamp the movement values based on the speed
         move_x = max(-self.speed, min(self.speed, move_x))
         move_y = max(-self.speed, min(self.speed, move_y))
+        move_z = max(-self.speed, min(self.speed, move_z))
 
-        self.pX = self.rect.x
-        self.pY = self.rect.y
         # Update position
         self.rect.x += int(move_x)
         self.rect.y += int(move_y)
+        self.z += int(move_z)  # Update Z position
 
-        # Keep within screen bounds
+        # Keep within screen bounds (for X and Y)
         self.rect.x = max(0, min(self.rect.x, SCREEN_WIDTH - self.rect.width))
         self.rect.y = max(0, min(self.rect.y, SCREEN_HEIGHT - self.rect.height))
 
+        # Keep Z within bounds
+        self.z = max(0, min(self.z, 100))  # Define a maximum depth for Z
+
 
 class Cat(Animal):
-    def __init__(self, x, y, color, input_size, hidden_size, output_size, speed, pX, pY):
-        super().__init__(x, y, color, input_size, hidden_size, output_size, speed, pX, pY)
+    def __init__(self, x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY, pZ):
+        super().__init__(x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY, pZ)
         # Additional Cat-specific initializations
 
     def move(self, direction):
@@ -236,9 +251,10 @@ class Cat(Animal):
      
 
 class Mouse(Animal):
-    def __init__(self, x, y, color, input_size, hidden_size, output_size, speed,pX, pY):
-        super().__init__(x, y, color, input_size, hidden_size, output_size, speed,pX, pY)
+    def __init__(self, x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY, pZ):
+        super().__init__(x, y, z, color, input_size, hidden_size, output_size, speed, pX, pY, pZ)
         self.edge_touch = False
+        
     def move(self, direction):
         global epoch
         global wallMut 
@@ -266,22 +282,22 @@ class Mouse(Animal):
             return
 
         
-cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), (255,random.randint(0,150),0), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, CAT_SPEED,0,0) for _ in range(int(noCats))]
-mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), (0,255,random.randint(0,150)), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED,0,0) for _ in range(int(noMice))]
+cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), random.randint(0, 100),(255, random.randint(0, 150), 0), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, CAT_SPEED, 0, 0, 0) for _ in range(int(noCats))]
 
-
+mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), random.randint(0, 100), (0, 255, random.randint(0, 150)), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED, 0, 0, 0) for _ in range(int(noMice))]
 input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other animal
 
 for cat in cats:
-    cat.brain = np.random.rand(input_size, 2)
+    cat.brain = np.random.rand(input_size, 3)  # Output should be 3D
 
 for mouse in mice:
-    mouse.brain = np.random.rand(input_size, 2)
+    mouse.brain = np.random.rand(input_size, 3)  # Output should be 3D
     
 def check_collision(predator, prey, catch_distance):
     predator_center = predator.rect.center
     prey_center = prey.rect.center
-    return distance(predator_center[0], predator_center[1], prey_center[0], prey_center[1]) < catch_distance
+    return distance(predator_center[0], predator_center[1], predator.z, prey_center[0], prey_center[1], prey.z) < catch_distance
+
 
 def normalize_coordinate(x, max_value):
     return x / max_value
@@ -292,8 +308,10 @@ def construct_input_for_animal(current_animal, cats, mice):
     normT = normalize_coordinate(Time, TIME_THRESHOLD)
     normX = normalize_coordinate(current_animal.rect.x, SCREEN_WIDTH)
     normY = normalize_coordinate(current_animal.rect.y, SCREEN_HEIGHT)
+    normZ = normalize_coordinate(current_animal.z, 100)
+
     # Include the current animal's own x, y positions first
-    inputs.extend([normX, normY])
+    inputs.extend([normX, normY, normZ])
 
     for cat in cats:
         # Include the x, y positions, type flag, and catch status of the cat
@@ -303,14 +321,20 @@ def construct_input_for_animal(current_animal, cats, mice):
         # Include the differences in x, y
         diff_x = current_animal.rect.x - cat.rect.x
         diff_y = current_animal.rect.y - cat.rect.y
+        diff_z = current_animal.z - cat.z
+
         diff_x = normalize_coordinate(diff_x, SCREEN_WIDTH)
         diff_y = normalize_coordinate(diff_y, SCREEN_WIDTH)
+        diff_z = normalize_coordinate(diff_z, 100)
+
 
 
         diff_xP = current_animal.rect.x - cat.pX
         diff_yP = current_animal.rect.y - cat.pY
+        diff_zP = current_animal.z - cat.pZ
+
         
-        inputs.extend([diff_x, diff_y, diff_xP, diff_yP])
+        inputs.extend([diff_x, diff_y,diff_z, diff_xP, diff_yP, diff_zP])
 
     for mouse in mice:
         # Include the x, y positions, type flag, and catch status of the mouse
@@ -320,14 +344,20 @@ def construct_input_for_animal(current_animal, cats, mice):
         # Include the differences in x, y
         diff_x = current_animal.rect.x - mouse.rect.x
         diff_y = current_animal.rect.y - mouse.rect.y
+        diff_z = current_animal.z - cat.z
+
         diff_x = normalize_coordinate(diff_x, SCREEN_WIDTH)
         diff_y = normalize_coordinate(diff_y, SCREEN_WIDTH)
+        diff_z = normalize_coordinate(diff_z, 100)
+
 
         
         diff_xP = current_animal.rect.x - cat.pX
         diff_yP = current_animal.rect.y - cat.pY
+        diff_zP = current_animal.z - cat.pZ
+
         
-        inputs.extend([diff_x, diff_y, diff_xP, diff_yP])
+        inputs.extend([diff_x, diff_y, diff_z, diff_xP, diff_yP, diff_zP])
     inputs.append(normT)
     return np.array(inputs)
 
@@ -397,7 +427,7 @@ while running:
         reset_predators(cats)
         reset_preys(mice)
     last_cat_to_catch = None
-   
+    
     for cat in cats:
         for mouse in mice:
             if check_collision(cat, mouse, CATCH_DISTANCE) and cat.catch == False and mouse.catch == False:
@@ -455,18 +485,27 @@ while running:
         inputs = construct_input_for_animal(cat, cats, mice)
         direction = cat.think(inputs)
         cat.move(direction)
-        cat.draw()
 
     for mouse in mice:
         inputs = construct_input_for_animal(mouse, cats, mice)
         direction = mouse.think(inputs)
         mouse.move(direction)
-        mouse.draw()
 
    
 
  
+    # Combine cats and mice into a single list
+    all_animals = cats + mice
 
+    # Sort the animals based on their Z-coordinate (higher Z-coordinates should be drawn last)
+    all_animals.sort(key=lambda animal: animal.z, reverse=True)
+
+    # ... other game loop code ...
+
+    # Draw each animal
+    for animal in all_animals:
+        animal.draw()
+        
     epoch_surface = myFont.render(f"Epoch: {epoch}", True, WHITE)
     epoch_position = (SCREEN_WIDTH - 150, 10)  # Adjust position as needed
     screen.blit(epoch_surface, epoch_position)
