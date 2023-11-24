@@ -39,7 +39,7 @@ smarts = input('Intelligence, higher values increase training time, use 2 for ex
 cP = input('Predators cooperate (all cats mutate if time runs out with mice left if true) (t or f)')
 mutateLast = input('Mutate cat last to catch? (t or f), t is default behavior, if f, cats only mutate when they run out of time or on wall :')
 
-hidden_size = 33 * int(smarts) # Number of hidden neurons, 4 works somewhat
+hidden_size = 33 * int(smarts) # Number of hidden neurons
 
 
 mouseLoseStreak = 0
