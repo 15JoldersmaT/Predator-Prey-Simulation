@@ -136,11 +136,19 @@ class Animal:
   # Example brain structure
 
     def draw(self):
-        # Calculate the center of the rectangle
-        center = self.rect.center
-        # Assuming the width and height of the rect are the same, use either for the radius
-        radius = self.rect.width // 2
-        pygame.draw.circle(screen, self.color, center, radius)
+        # Scale factor based on Z (example logic)
+        scale = 1 - self.z / 100
+        # Set a minimum scale to prevent the animals from getting too small
+        min_scale = 0.15  # You can adjust this value as needed
+        scale = max(scale, min_scale)
+        
+        radius = int((self.rect.width // 2) * scale)
+
+        # Adjust the position to simulate depth
+        center_x = int(self.rect.centerx * scale)
+        center_y = int(self.rect.centery * scale)
+
+        pygame.draw.circle(screen, self.color, (center_x, center_y), radius)
 
     
     
