@@ -391,6 +391,7 @@ def save_game(cats, mice, epoch, Time, af, TIME_THRESHOLD):
     game_state = {
         'cats': cats,
         'mice': mice,
+        'INPUT_SIZE' : INPUT_SIZE,
         'epoch': epoch,
         'Time': Time,
         'af' : af,
@@ -437,12 +438,13 @@ def get_game_state():
 
         for mouse in mice:
             mouse.brain = np.random.rand(INPUT_SIZE, 3)  # Output should be 3D
-        return {'cats': cats, 'mice': mice, 'epoch': 0, 'Time': 0}
+        return {'cats': cats, 'mice': mice, 'epoch': 0, 'Time': 0, 'INPUT_SIZE' : INPUT_SIZE}
 
 
 game_state = get_game_state()
 cats = game_state['cats']
 mice = game_state['mice']
+INPUT_SIZE= game_state['INPUT_SIZE']
 epoch = game_state['epoch']
 Time = game_state['Time']
 af = game_state.get('af', 'leaky_relu')  # Default if not found
