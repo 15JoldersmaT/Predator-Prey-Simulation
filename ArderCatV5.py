@@ -1,9 +1,6 @@
 import pygame
 import numpy as np
 import random
-import os
-
-game = input('Save name (new name for new simulation)')
 
 
 print ('Good example setup, 2 cats 2 mice')
@@ -266,12 +263,13 @@ cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), (
 mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), (0,255,random.randint(0,150)), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED,0,0) for _ in range(int(noMice))]
 
 
+input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other animal
 
 for cat in cats:
-    cat.brain = np.random.rand(INPUT_SIZE, 2)
+    cat.brain = np.random.rand(input_size, 2)
 
 for mouse in mice:
-    mouse.brain = np.random.rand(INPUT_SIZE, 2)
+    mouse.brain = np.random.rand(input_size, 2)
     
 def check_collision(predator, prey, catch_distance):
     predator_center = predator.rect.center
@@ -328,75 +326,6 @@ def construct_input_for_animal(current_animal, cats, mice):
 
 myFont = pygame.font.SysFont("Times New Roman", 18)
 
-############SAVE LOGIC####################
-import pickle
-
-def save_game(cats, mice, epoch, Time, af, TIME_THRESHOLD, INPUT_SIZE):
-    global game
-    game_state = {
-        'cats': cats,
-        'mice': mice,
-        'INPUT_SIZE' : INPUT_SIZE,
-        'epoch': epoch,
-        'Time': Time,
-        'af' : af,
-        'TIME_THRESHOLD' : TIME_THRESHOLD
-    }
-    with open(str(game)+'.pkl', 'wb') as file:
-        pickle.dump(game_state, file)
-
-
-
-
-##########################################
-
-#############LOAD LOGIC###################
-
-
-    
-def load_game():
-    global game
-    with open(str(game)+ '.pkl', 'rb') as file:
-        game_state = pickle.load(file)
-    return game_state
-
-
-def get_game_state():
-    global game
-    file_path = f'{game}.pkl'
-
-    if os.path.exists(file_path):
-        print("Loading saved game...")
-        return load_game()
-    else:
-        print("Starting new game...")
-        # Return initial game state values
-        cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), (255,random.randint(0,150),0), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, CAT_SPEED,0,0) for _ in range(int(noCats))]
-        mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), (0,255,random.randint(0,150)), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED,0,0) for _ in range(int(noMice))]
-
-
-
-
-        for cat in cats:
-            cat.brain = np.random.rand(INPUT_SIZE, 3)  # Output should be 3D
-
-        for mouse in mice:
-            mouse.brain = np.random.rand(INPUT_SIZE, 3)  # Output should be 3D
-        return {'cats': cats, 'mice': mice, 'epoch': 0, 'Time': 0}
-
-
-game_state = get_game_state()
-cats = game_state['cats']
-mice = game_state['mice']
-
-noCats = len(cats) 
-noMice = len(mice)  
-INPUT_SIZE = 3 + (noCats * 6) + (noMice * 6)
-epoch = game_state['epoch']
-Time = game_state['Time']
-af = game_state.get('af', 'leaky_relu')  # Default if not found
-TIME_THRESHOLD = game_state.get('TIME_THRESHOLD', 500)  # Default if not found
-############################################
 
 running = True
 while running:
@@ -430,9 +359,6 @@ while running:
                     drawStuff = True
                 else:
                     drawStuff = False
-            elif event.key == pygame.K_s:  # Save the game when 's' is pressed
-                save_game(cats, mice,INPUT_SIZE, epoch, Time, af, TIME_THRESHOLD)
-                print(f"Game saved as '{game}.pkl'")
                     
 
 
