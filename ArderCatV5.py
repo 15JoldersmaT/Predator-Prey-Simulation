@@ -266,13 +266,12 @@ cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), (
 mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), (0,255,random.randint(0,150)), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED,0,0) for _ in range(int(noMice))]
 
 
-input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other animal
 
 for cat in cats:
-    cat.brain = np.random.rand(input_size, 2)
+    cat.brain = np.random.rand(INPUT_SIZE, 2)
 
 for mouse in mice:
-    mouse.brain = np.random.rand(input_size, 2)
+    mouse.brain = np.random.rand(INPUT_SIZE, 2)
     
 def check_collision(predator, prey, catch_distance):
     predator_center = predator.rect.center
@@ -332,12 +331,12 @@ myFont = pygame.font.SysFont("Times New Roman", 18)
 ############SAVE LOGIC####################
 import pickle
 
-def save_game(cats, mice, epoch, Time, af, TIME_THRESHOLD):
+def save_game(cats, mice, epoch, Time, af, TIME_THRESHOLD, INPUT_SIZE):
     global game
-
     game_state = {
         'cats': cats,
         'mice': mice,
+        'INPUT_SIZE' : INPUT_SIZE,
         'epoch': epoch,
         'Time': Time,
         'af' : af,
@@ -389,6 +388,10 @@ def get_game_state():
 game_state = get_game_state()
 cats = game_state['cats']
 mice = game_state['mice']
+
+noCats = len(cats) 
+noMice = len(mice)  
+INPUT_SIZE = 3 + (noCats * 6) + (noMice * 6)
 epoch = game_state['epoch']
 Time = game_state['Time']
 af = game_state.get('af', 'leaky_relu')  # Default if not found
@@ -428,7 +431,7 @@ while running:
                 else:
                     drawStuff = False
             elif event.key == pygame.K_s:  # Save the game when 's' is pressed
-                save_game(cats, mice, epoch, Time, af, TIME_THRESHOLD)
+                save_game(cats, mice,INPUT_SIZE, epoch, Time, af, TIME_THRESHOLD)
                 print(f"Game saved as '{game}.pkl'")
                     
 
