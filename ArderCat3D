@@ -385,7 +385,7 @@ myFont = pygame.font.SysFont("Times New Roman", 18)
 ############SAVE LOGIC####################
 import pickle
 
-def save_game(cats, mice, epoch, Time, af, TIME_THRESHOLD):
+def save_game(cats, mice, epoch, Time, af, TIME_THRESHOLD, INPUT_SIZE):
     global game
 
     game_state = {
@@ -485,7 +485,7 @@ while running:
                 else:
                     drawStuff = False
             elif event.key == pygame.K_s:  # Save the game when 's' is pressed
-                save_game(cats, mice, epoch, Time, af, TIME_THRESHOLD)
+                save_game(cats, mice, epoch, Time, af, TIME_THRESHOLD, INPUT_SIZE)
                 print(f"Game saved as '{game}.pkl'")
 
             if FPS < 10:  # Ensure FPS doesn't go below a reasonable threshold
