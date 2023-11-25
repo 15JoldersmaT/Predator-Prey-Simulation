@@ -346,7 +346,7 @@ def construct_input_for_animal(current_animal, cats, mice):
         # Include the differences in x, y
         diff_x = current_animal.rect.x - mouse.rect.x
         diff_y = current_animal.rect.y - mouse.rect.y
-        diff_z = current_animal.z - cat.z
+        diff_z = current_animal.z - mouse.z
 
         diff_x = normalize_coordinate(diff_x, SCREEN_WIDTH)
         diff_y = normalize_coordinate(diff_y, SCREEN_WIDTH)
@@ -354,9 +354,9 @@ def construct_input_for_animal(current_animal, cats, mice):
 
 
         
-        diff_xP = current_animal.rect.x - cat.pX
-        diff_yP = current_animal.rect.y - cat.pY
-        diff_zP = current_animal.z - cat.pZ
+        diff_xP = current_animal.rect.x - mouse.pX
+        diff_yP = current_animal.rect.y - mouse.pY
+        diff_zP = current_animal.z - mouse.pZ
 
         
         inputs.extend([diff_x, diff_y, diff_z, diff_xP, diff_yP, diff_zP])
