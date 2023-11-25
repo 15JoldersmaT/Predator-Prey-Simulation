@@ -295,7 +295,7 @@ class Mouse(Animal):
 cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), random.randint(0, 100),(255, random.randint(0, 150), 0), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, CAT_SPEED, 0, 0, 0) for _ in range(int(noCats))]
 
 mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), random.randint(0, 100), (0, 255, random.randint(0, 150)), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED, 0, 0, 0) for _ in range(int(noMice))]
-input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other animal
+#input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other animal
 
 
 
@@ -304,10 +304,10 @@ input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other an
 
 
 for cat in cats:
-    cat.brain = np.random.rand(input_size, 3)  # Output should be 3D
+    cat.brain = np.random.rand(INPUT_SIZE, 3)  # Output should be 3D
 
 for mouse in mice:
-    mouse.brain = np.random.rand(input_size, 3)  # Output should be 3D
+    mouse.brain = np.random.rand(INPUT_SIZE, 3)  # Output should be 3D
     
 def check_collision(predator, prey, catch_distance):
     predator_center = predator.rect.center
@@ -428,16 +428,15 @@ def get_game_state():
         cats = [Cat(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), random.randint(0, 100),(255, random.randint(0, 150), 0), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, CAT_SPEED, 0, 0, 0) for _ in range(int(noCats))]
 
         mice = [Mouse(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT), random.randint(0, 100), (0, 255, random.randint(0, 150)), INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, MOUSE_SPEED, 0, 0, 0) for _ in range(int(noMice))]
-        input_size = 2 + 6 * len(cats) + 6 * len(mice) +1   # 2 for self, 6 per other animal
 
 
 
 
         for cat in cats:
-            cat.brain = np.random.rand(input_size, 3)  # Output should be 3D
+            cat.brain = np.random.rand(INPUT_SIZE, 3)  # Output should be 3D
 
         for mouse in mice:
-            mouse.brain = np.random.rand(input_size, 3)  # Output should be 3D
+            mouse.brain = np.random.rand(INPUT_SIZE, 3)  # Output should be 3D
         return {'cats': cats, 'mice': mice, 'epoch': 0, 'Time': 0}
 
 
