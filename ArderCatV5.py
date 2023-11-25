@@ -317,8 +317,8 @@ def construct_input_for_animal(current_animal, cats, mice):
         diff_y = normalize_coordinate(diff_y, SCREEN_WIDTH)
 
         
-        diff_xP = current_animal.rect.x - cat.pX
-        diff_yP = current_animal.rect.y - cat.pY
+        diff_xP = current_animal.rect.x - mouse.pX
+        diff_yP = current_animal.rect.y - mouse.pY
         
         inputs.extend([diff_x, diff_y, diff_xP, diff_yP])
     inputs.append(normT)
