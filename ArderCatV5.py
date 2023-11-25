@@ -34,6 +34,7 @@ INPUT_SIZE = 4 + (noCats * 10) + (noMice * 10)
 HIDDEN_SIZE = 66 # Number of hidden neurons, 4 works somewhat
 OUTPUT_SIZE = 2  # Number of output neurons
 
+drawStuff = True
 
 smarts = input('Intelligence, higher values increase training time, use 2 for example.')
 cP = input('Predators cooperate (all cats mutate if time runs out with mice left if true) (t or f)')
@@ -391,9 +392,11 @@ while running:
                 FPS = 550  # Decrease FPS
             elif event.key == pygame.K_0:
                 FPS = 1500  # Decrease FPS
-
-
-
+            elif event.key == pygame.K_d:
+                if drawStuff == False:
+                    drawStuff = True
+                else:
+                    drawStuff = False
 
             if FPS < 10:  # Ensure FPS doesn't go below a reasonable threshold
                 FPS = 10
@@ -503,12 +506,13 @@ while running:
     # ... other game loop code ...
 
     # Draw each animal
-    for animal in all_animals:
-        animal.draw()
+    if drawStuff == True:
+        for animal in all_animals:
+            animal.draw()
         
-    epoch_surface = myFont.render(f"Epoch: {epoch}", True, WHITE)
-    epoch_position = (SCREEN_WIDTH - 150, 10)  # Adjust position as needed
-    screen.blit(epoch_surface, epoch_position)
+        epoch_surface = myFont.render(f"Epoch: {epoch}", True, WHITE)
+        epoch_position = (SCREEN_WIDTH - 150, 10)  # Adjust position as needed
+        screen.blit(epoch_surface, epoch_position)
     
     pygame.display.flip()
     clock.tick(FPS)
