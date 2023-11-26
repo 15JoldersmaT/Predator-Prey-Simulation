@@ -152,8 +152,8 @@ class Animal:
         radius = int((self.rect.width // 2) * scale)
 
         # Adjust the position to simulate depth
-        center_x = int(self.rect.centerx * scale)
-        center_y = int(self.rect.centery * scale)
+        center_x = int(self.rect.centerx)
+        center_y = int(self.rect.centery)
 
         pygame.draw.circle(screen, self.color, (center_x, center_y), radius)
 
